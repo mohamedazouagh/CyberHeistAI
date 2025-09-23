@@ -718,5 +718,5 @@ on('#tutorialClose', 'click', () => {
     });
   }
 });
-// test change for CodeRabbit
-if (true) { console.log("debugging line"); }
+
+
