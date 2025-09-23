@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CyberHeistAI — All Ages</title>
+  <link href="style.css" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+  <canvas id="matrix-bg" aria-hidden="true"></canvas>
+    <!-- MAIN MENU -->
+  <div id="main-menu" class="menu-screen">
+  <div class="menu-content">
+    <h1>CyberHeistAI</h1>
+    <p class="subtitle">Hacking Simulation</p>
+
+    <button id="btn-start">Start Game</button>
+    <button id="btn-settings">Settings</button>
+    <button id="btn-howto">How to Play</button>
+    <button id="btn-leaderboard">Leaderboard</button>
+  </div>
+  </div>
+
+  <!-- Settings screen inside main menu -->
+  <div id="menu-settings" class="menu-content hidden">
+    <h2>Settings</h2>
+    <label for="menu-level-settings">Difficulty:</label>
+    <select id="menu-level-settings">
+      <option value="kid">Rookie</option>
+      <option value="standard">Operative</option>
+      <option value="expert">Elite</option>
+    </select>
+    <div style="margin-top:1rem">
+      <button id="btn-settings-back">Back</button>
+    </div>
+  </div>
+  </div>
+
+
+
+  <div id="game-container" role="application" aria-label="CyberHeistAI hacking simulation" class="hidden">
+    <header class="hud-header">
+      <div class="header-brand"><p><strong>SYSTEM:</strong> CHIMERA_OS</p></div>
+      <div class="header-meters">
+        <div class="meter-container" aria-live="polite">
+          <p>ALERT LEVEL:</p>
+          <div class="meter-bar" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Threat level">
+            <div id="threatBar"></div>
+          </div>
+          <p id="threatValue">0%</p>
+        </div>
+        <div class="timer-container" aria-live="polite">
+          <p>TIME LEFT:</p>
+          <p id="timeLeft">03:00</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Settings (in-game HUD) -->
+    <div class="settings-bar">
+      <label>Reduced Motion:
+        <input id="rmToggle" type="checkbox">
+      </label>
+      <label>Colorblind:
+        <input id="cbToggle" type="checkbox">
+      </label>
+      <button id="btn-tutorial" class="btn-secondary">Quick Tutorial</button>
+      <button id="btn-mute" class="btn-secondary" aria-pressed="false">Mute SFX</button>
+    </div>
+
+    <main class="main-grid">
+      <section id="panel-objectives" class="panel objectives-window">
+        <div class="window">
+          <div class="window-title">OBJECTIVES <span id="objCounter">0/3</span></div>
+          <ul id="objectives">
+            <li data-task="cracker" class="clickable">ACCESS TOKEN</li>
+            <li data-task="frequency" class="clickable">BYPASS FREQUENCY LOCK</li>
+            <li data-task="sequence" class="clickable">DECODE PATTERN SEQUENCE</li>
+          </ul>
+        </div>
+        <button id="btn-next-focus" class="btn-secondary" style="margin-top:.5rem">Next</button>
+      </section>
+
+      <section id="panel-log" class="panel log-window">
+        <div class="window">
+          <div class="window-title">LOG</div>
+          <div id="log"></div>
+        </div>
+      </section>
+
+      <section id="panel-right" class="panel panel-right">
+        <div class="operations-content">
+          <!-- Access choice -->
+          <div id="screen-choice" class="task-screen">
+            <div class="window">
+              <div class="window-title">ACCESS TOKEN :: CHOOSE METHOD</div>
+              <p class="task-desc">Choose your approach. Beat the countermeasures. Get in.</p>
+              <div class="choice-buttons">
+                <button id="btn-lockpick">LOCKPICK MINI-GAME</button>
+                <button id="btn-math">MATH HACK</button>
+              </div>
+              <p class="hint-line">Finish either one to complete the ACCESS TOKEN objective.</p>
+            </div>
+          </div>
+
+          <!-- Lockpick mini-game (new) -->
+          <div id="screen-lockpick" class="task-screen hidden" aria-labelledby="lockpick-title">
+            <div class="window">
+              <div class="window-title" id="lockpick-title">LOCKPICK — SET ALL PINS</div>
+              <p class="task-desc">Press <strong>SET PIN</strong> when the marker is inside the green zone.</p>
+              <div id="lockpickPins" class="pins"></div>
+              <div class="button-group">
+                <button id="btn-set-pin">SET PIN</button>
+                <button class="btn-secondary" data-nav="choice">BACK</button>
+              </div>
+              <p id="lockpickStatus" class="task-status" aria-live="polite"></p>
+            </div>
+          </div>
+
+          <!-- Math hack -->
+          <div id="screen-math" class="task-screen hidden" aria-labelledby="math-title">
+            <div class="window">
+              <div class="window-title" id="math-title">MATH HACK :: SOLVE</div>
+              <p id="math-question" data-answer="">2 + 2 = ?</p>
+              <input type="number" id="math-answer" autocomplete="off" aria-label="Math answer">
+              <div class="button-group">
+                <button id="btn-submit-math">SUBMIT</button>
+                <button id="btn-new-problem" class="btn-secondary">SKIP (+)</button>
+                <button class="btn-secondary" data-nav="choice">BACK</button>
+              </div>
+              <button id="btn-hint-math" class="btn-hint">GET HINT (+)</button>
+            </div>
+          </div>
+
+          <!-- Frequency -->
+          <div id="task-frequency" class="task-container hidden" aria-labelledby="freq-title">
+            <div class="window">
+              <div class="window-title" id="freq-title">FREQUENCY LOCK</div>
+              <div class="freq-display">
+                <p>TARGET: <span id="freqTarget">...</span></p>
+                <p>TOLERANCE: <span id="freqTol">...</span></p>
+                <p>CURRENT: <span id="freqCurrent">...</span></p>
+              </div>
+              <input type="range" min="0" max="1000" value="500" class="slider" id="freqSlider">
+              <div class="button-group">
+                <button id="freqLockBtn">LOCK FREQUENCY</button>
+                <button id="btn-hint-freq" class="btn-hint">GET HINT (+)</button>
+                <button class="btn-secondary" data-nav="choice">BACK</button>
+              </div>
+              <p id="freqStatus" class="task-status" aria-live="polite"></p>
+            </div>
+          </div>
+
+          <!-- Sequence -->
+          <div id="task-sequence" class="task-container hidden" aria-labelledby="seq-title">
+            <div class="window">
+              <div class="window-title" id="seq-title">PATTERN SEQUENCE</div>
+              <div id="symbols" class="symbols-grid"></div>
+              <div class="button-group">
+                <button id="showSeqBtn">SHOW SEQUENCE</button>
+                <button id="btn-hint-seq" class="btn-hint">GET HINT (+)</button>
+                <button class="btn-secondary" data-nav="choice">BACK</button>
+              </div>
+              <p id="seqStatus" class="task-status" aria-live="polite"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="stabilize-container">
+          <button id="stabilizeBtn" title="Reduce alert by 10%">STABILIZE SIGNAL</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="overlay" role="application" aria-label="CyberHeistAI hacking simulation" class="hidden">
+    <div class="overlay-content">
+      <h1 id="overlayTitle"></h1>
+      <p id="overlayMsg"></p>
+      <div id="winExtras" class="hidden">
+        <div class="achievements">
+          <div class="window-title">ACHIEVEMENTS</div>
+          <ul id="achievementsList"></ul>
+        </div>
+        <div class="score-submit">
+          <input id="playerName" type="text" placeholder="Your Name" maxlength="16" aria-label="Name">
+          <div class="button-group">
+            <button id="saveScoreBtn">Save Score</button>
+            <button id="shareScoreBtn" class="btn-secondary">Share Results</button>
+          </div>
+        </div>
+        <div class="leaderboard">
+          <div class="window-title">LEADERBOARD <span id="lbDiff"></span></div>
+          <ol id="leaderboardList"></ol>
+        </div>
+      </div>
+      <button id="restartBtn">RESTART</button>
+    </div>
+  </div>
+
+  <dialog id="tutorialDialog">
+    <h2>Quick Tutorial</h2>
+    <p>Beat the three objectives before time or alert runs out.</p>
+    <ul>
+      <li><strong>Access Token:</strong> Play Lockpick or Math (only one needed).</li>
+      <li><strong>Frequency:</strong> Slide to target within tolerance, then lock.</li>
+      <li><strong>Sequence:</strong> Watch the pattern and repeat.</li>
+    </ul>
+    <p><em>Tip:</em> <strong>Stabilize</strong> reduces alert. Hints/Skips increase alert a bit.</p>
+    <div class="button-group"><button id="tutorialClose">Got it</button></div>
+  </dialog>
+
+  <dialog id="leaderboardDialog">
+    <h2>Top Scores</h2>
+    <p class="subtitle">Per difficulty</p>
+    <div class="lb-section">
+      <h3>Rookie</h3>
+      <ol id="lb-kid"></ol>
+    </div>
+    <div class="lb-section">
+      <h3>Operative</h3>
+      <ol id="lb-standard"></ol>
+    </div>
+    <div class="lb-section">
+      <h3>Elite</h3>
+      <ol id="lb-expert"></ol>
+    </div>
+    <div class="button-group"><button id="leaderboardClose">Close</button></div>
+  </dialog>
+
+  <script src="main.js"></script>
+</body>
+</html>
