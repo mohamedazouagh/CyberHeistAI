@@ -149,7 +149,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const t = new Date().toLocaleTimeString();
     const div = document.createElement('div');
     div.className = `log-line ${type}`;
-    div.innerHTML = `[<span>${t}</span>] ${msg}`;
+    const timestamp = document.createElement('span');
+    timestamp.textContent = t;
+    div.append('[', timestamp, `] ${msg}`);
     log.appendChild(div);
     log.scrollTop = log.scrollHeight;
   }
@@ -320,7 +322,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const key = `ch_lb_${diff}`;
     const arr = JSON.parse(localStorage.getItem(key) || '[]');
     const el = byId('leaderboardList'); if (!el) return;
-    el.innerHTML = arr.map((r, i) => `<li>${i+1}. ${r.name} — ${r.score}</li>`).join('') || '<li>No scores yet.</li>';
+    renderScores(el, arr);
+  }
+
+  function renderScores(element, scores) {
+    element.replaceChildren();
+    const rows = scores.length ? scores : [{ name: 'No scores yet.', score: null }];
+    rows.forEach((score, index) => {
+      const item = document.createElement('li');
+      item.textContent = score.score == null ? score.name : `${index + 1}. ${score.name} — ${score.score}`;
+      element.appendChild(item);
+    });
   }
 
   function updateObjectivesCounter() {
@@ -714,7 +726,9 @@ on('#tutorialClose', 'click', () => {
       const key = `ch_lb_${d}`;
       const arr = JSON.parse(localStorage.getItem(key) || '[]');
       const el = byId(`lb-${d}`); if (!el) return;
-      el.innerHTML = arr.map((r, i) => `<li>${i+1}. ${r.name} — ${r.score}</li>`).join('') || '<li>No scores yet.</li>';
+      renderScores(el, arr);
     });
   }
 });
+
+
